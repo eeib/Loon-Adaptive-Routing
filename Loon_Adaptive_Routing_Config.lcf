@@ -1,0 +1,200 @@
+# Loon Aurora Adaptive Routing
+# 架构：节点过滤 → 地区能力 → 业务智能 → 通用代理 → FINAL
+# 网络：IPv6 优先，IPv6 VIF 始终开启
+# Date: 2026-08-29
+
+[General]
+ip-mode=prefer-v6
+ipv6-vif=always
+dns-server=system
+sni-sniffing=true
+disable-stun=true
+dns-reject-mode=LoopbackIP
+domain-reject-mode=DNS
+udp-fallback-mode=REJECT
+wifi-access-http-port=7222
+wifi-access-socks5-port=7221
+allow-wifi-access=false
+interface-mode=auto
+test-timeout=5
+disconnect-on-policy-change=false
+internet-test-url=http://connectivitycheck.platform.hicloud.com/generate_204
+proxy-test-url=http://www.gstatic.com/generate_204
+resource-parser=https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
+geoip-url=https://geodata.kelee.one/Country-Masaiki.mmdb
+ipasn-url=https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb
+skip-proxy=192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local
+bypass-tun=10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32
+
+[Proxy]
+
+[Remote Proxy]
+
+[Remote Filter]
+香港节点=NameRegex, FilterKey="^(?=.*((?i)🇭🇰|香港|(\b(HK|HKG|Hong|Hong Kong)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+澳门节点=NameRegex, FilterKey="^(?=.*((?i)🇲🇴|澳门|澳門|(\b(MO|MAC|Macao|Macau)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+台湾节点=NameRegex, FilterKey="^(?=.*((?i)🇹🇼|台湾|臺灣|(\b(TW|TWN|Tai|Taiwan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+日本节点=NameRegex, FilterKey="^(?=.*((?i)🇯🇵|日本|东京|東京|大阪|埼玉|(\b(JP|JPN|Japan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+韩国节点=NameRegex, FilterKey="^(?=.*((?i)🇰🇷|韩国|韓國|韓|首尔|首爾|(\b(KR|KOR|Korea)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+新加坡节点=NameRegex, FilterKey="^(?=.*((?i)🇸🇬|新加坡|狮城|獅城|(\b(SG|SGP|Singapore)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+美国节点=NameRegex, FilterKey="^(?=.*((?i)🇺🇸|美国|美國|洛杉矶|洛杉磯|圣何塞|聖何塞|西雅图|西雅圖|硅谷|矽谷|芝加哥|达拉斯|達拉斯|(\b(US|USA|United States)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+英国节点=NameRegex, FilterKey="^(?=.*((?i)🇬🇧|英国|英國|伦敦|倫敦|(\b(UK|GB|GBR|United Kingdom|Britain|London)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+德国节点=NameRegex, FilterKey="^(?=.*((?i)🇩🇪|德国|德國|法兰克福|法蘭克福|柏林|(\b(DE|DEU|Germany|Frankfurt|Berlin)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+澳大利亚节点=NameRegex, FilterKey="^(?=.*((?i)🇦🇺|澳大利亚|澳大利亞|澳洲|悉尼|墨尔本|墨爾本|(\b(AU|AUS|Australia|Sydney|Melbourne)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|遊戲|🎮|(\bGAME\b))).*$"
+全球节点=NameRegex, FilterKey="^(?=.*(.))(?!.*((?i)回国|校园|游戏|遊戲|🎮|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|好友|失联|(\b(GAME|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
+
+[Proxy Group]
+# ================================================================
+# 第一层：地区能力
+# 每个地区仅保留 url-test 自动优选 + select 手动选择
+# ================================================================
+
+香港自动=url-test, 香港节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+香港手动=select, 香港节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+
+澳门自动=url-test, 澳门节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Macao.png
+澳门手动=select, 澳门节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Macao.png
+
+台湾自动=url-test, 台湾节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+台湾手动=select, 台湾节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+
+日本自动=url-test, 日本节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+日本手动=select, 日本节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+
+韩国自动=url-test, 韩国节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Korea.png
+韩国手动=select, 韩国节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Korea.png
+
+新加坡自动=url-test, 新加坡节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+新加坡手动=select, 新加坡节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+
+美国自动=url-test, 美国节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+美国手动=select, 美国节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+
+英国自动=url-test, 英国节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_Kingdom.png
+英国手动=select, 英国节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_Kingdom.png
+
+德国自动=url-test, 德国节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Germany.png
+德国手动=select, 德国节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Germany.png
+
+澳大利亚自动=url-test, 澳大利亚节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Australia.png
+澳大利亚手动=select, 澳大利亚节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Australia.png
+
+
+全球自动=url-test, 全球节点, interval=60, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+全球手动=select, 全球节点, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+
+# ================================================================
+# 第二层：业务自动出口
+# fallback 只用于有明确地区偏好的业务
+# ================================================================
+
+AI自动=fallback, 新加坡自动, 美国自动, 日本自动, 全球自动, interval=60, max-timeout=2000, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/ChatGPT.png
+TikTok自动=fallback, 韩国自动, 日本自动, 新加坡自动, 美国自动, 全球自动, interval=60, max-timeout=2000, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/TikTok.png
+Netflix自动=fallback, 新加坡自动, 日本自动, 美国自动, 香港自动, 全球自动, interval=60, max-timeout=2000, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Netflix.png
+流媒体自动=fallback, 新加坡自动, 日本自动, 美国自动, 香港自动, 台湾自动, 全球自动, interval=60, max-timeout=2000, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+国际服务自动=fallback, 香港自动, 日本自动, 新加坡自动, 台湾自动, 韩国自动, 美国自动, 全球自动, interval=60, max-timeout=2000, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
+
+# ================================================================
+# 第三层：业务策略
+# 第一项均为自动出口，后续保留手动干预能力
+# ================================================================
+
+AI服务=select, AI自动, 新加坡手动, 美国手动, 日本手动, 全球手动, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/ChatGPT.png
+TikTok=select, TikTok自动, 韩国手动, 日本手动, 新加坡手动, 美国手动, 全球手动, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/TikTok.png
+Netflix=select, Netflix自动, 新加坡手动, 日本手动, 美国手动, 香港手动, 全球手动, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Netflix.png
+流媒体=select, 流媒体自动, 新加坡手动, 日本手动, 美国手动, 香港手动, 台湾手动, 全球手动, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+国际服务=select, 国际服务自动, 香港手动, 日本手动, 新加坡手动, 台湾手动, 韩国手动, 美国手动, 全球手动, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
+
+YouTube=select, 全球自动, 香港自动, 台湾自动, 日本自动, 韩国自动, 新加坡自动, 美国自动, 全球手动, img-url=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/YouTube.png
+Apple服务=select, DIRECT, 香港自动, 台湾自动, 日本自动, 新加坡自动, 美国自动, 全球手动, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+Speedtest=select, 全球自动, 全球手动, DIRECT, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+国内下载CDN=select, DIRECT, 全球自动, 全球手动, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png
+国际下载CDN=select, DIRECT, 全球自动, 全球手动, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png
+
+# ================================================================
+# 第四层：通用代理
+# 普通未分类流量默认走全球 url-test，不使用地区优先 fallback
+# ================================================================
+
+通用代理=select, 全球自动, 全球手动, 香港手动, 日本手动, 新加坡手动, 美国手动, DIRECT, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+
+[Rule]
+# 本地与保留地址
+IP-CIDR, 28.0.0.1/8, DIRECT
+IP-CIDR, 198.18.0.1/16, DIRECT
+IP-CIDR, 198.18.0.0/15, DIRECT
+IP-CIDR6, fc00::/18, DIRECT
+
+# 未命中特定业务规则的流量统一交给通用代理
+FINAL, 通用代理
+
+[Remote Rule]
+# AI
+https://kelee.one/Tool/Loon/Lsr/AI.lsr, policy=AI服务, tag=AI, enabled=true
+
+# TikTok
+https://kelee.one/Tool/Loon/Lsr/TikTok.lsr, policy=TikTok, tag=TikTok, enabled=true
+
+# Telegram / Google / GitHub / OneDrive 统一走国际服务
+https://kelee.one/Tool/Loon/Lsr/Telegram.lsr, policy=国际服务, tag=Telegram, enabled=true
+https://rule.kelee.one/Loon/Google.lsr, policy=国际服务, tag=Google, enabled=true
+https://rule.kelee.one/Loon/GitHub.lsr, policy=国际服务, tag=GitHub, enabled=true
+https://rule.kelee.one/Loon/OneDrive.lsr, policy=国际服务, tag=OneDrive, enabled=true
+
+# YouTube
+https://rule.kelee.one/Loon/YouTube.lsr, policy=YouTube, tag=YouTube, enabled=true
+
+# Netflix 独立；其他主流流媒体共用流媒体策略
+https://rule.kelee.one/Loon/Netflix.lsr, policy=Netflix, tag=Netflix, enabled=true
+https://rule.kelee.one/Loon/Disney.lsr, policy=流媒体, tag=Disney+, enabled=true
+https://rule.kelee.one/Loon/PrimeVideo.lsr, policy=流媒体, tag=Prime Video, enabled=true
+https://rule.kelee.one/Loon/DiscoveryPlus.lsr, policy=流媒体, tag=Discovery Plus, enabled=true
+
+# Apple
+https://kelee.one/Tool/Loon/Lsr/AppleAccount.lsr, policy=Apple服务, tag=Apple Account, enabled=true
+https://kelee.one/Tool/Loon/Lsr/AppStore.lsr, policy=Apple服务, tag=App Store, enabled=true
+
+# Speedtest
+https://kelee.one/Tool/Loon/Lsr/SpeedtestInternational.lsr, policy=Speedtest, tag=Speedtest Intl, enabled=true
+
+# 下载 CDN
+https://kelee.one/Tool/Loon/Lsr/ChinaDownloadCDN.lsr, policy=国内下载CDN, tag=国内下载CDN, enabled=true
+https://kelee.one/Tool/Loon/Lsr/InternationalDownloadCDN.lsr, policy=国际下载CDN, tag=国际下载CDN, enabled=true
+
+# 局域网与中国大陆规则最后匹配直连
+https://kelee.one/Tool/Loon/Lsr/LAN_SPLITTER.lsr, policy=DIRECT, tag=LAN, enabled=true
+https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=CN REGION, enabled=true
+
+[Host]
+
+[Rewrite]
+
+[Script]
+
+[Plugin]
+# 广告与隐私
+https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=通用代理, enabled=true
+
+# App 去广告
+https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Spotify_remove_ads.lpx, enabled=true
+
+# 搜索与检测
+https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true
+
+# 管理与脚本工具
+https://kelee.one/Tool/Loon/Lpx/Sub-Store.lpx, policy=通用代理, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Script-Hub.lpx, policy=通用代理, enabled=true
+https://kelee.one/Tool/Loon/Lpx/BoxJs.lpx, policy=通用代理, enabled=true
+
+# 可选功能
+https://kelee.one/Tool/Loon/Lpx/TestFlightRegionUnlock.lpx, policy=DIRECT, enabled=false
+
+[Mitm]
+hostname=
+ca-p12=
+ca-passphrase=
+skip-server-cert-verify=false
